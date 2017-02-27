@@ -1,0 +1,7 @@
+Admin;user;pass;N
+Admin;admin;pass;N
+Manager;testing;haha;N
+Manager;Vibish;password;N
+Manager;Weichao;password;N
+Manager;Weichao5;password;Y
+

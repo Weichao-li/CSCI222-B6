@@ -117,3 +117,4 @@ void Stock::setYear(int yy)
 {
 	year = yy;
 }
+

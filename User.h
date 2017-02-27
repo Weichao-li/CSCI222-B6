@@ -6,23 +6,16 @@
 #include <string>
 #include <stdio.h>
 #include <iostream>
-#include <limits>
-#include <cmath>
-#include <iomanip>
-#include <vector>
-#include <algorithm>
-#include <sstream>
 #include "Stock.h"
-
-
 using namespace std;
 
-class User: public Stock
+class User : public Stock
 {
 private:
 	string username;
 	string password;
 	string accountType;
+	string accStatus;
 	int loginAttempts;
 	bool isLocked;
 
@@ -30,7 +23,7 @@ private:
 
 public:
 	User();
-	User(string, string, string);
+	User(string, string, string, string);
 	~User();
 	void Login(User );
 	string getUsername();
@@ -40,7 +33,8 @@ public:
 	string getAccountType();
 	void setAccountType(string);
 	int getloginAttemps();
-	bool getAccountStatus();
+	string getAccountStatus();
+	void setAccountStatus();
 	void option1();
 	void option2();
 	void option3();
@@ -52,7 +46,15 @@ public:
 	void displayMenu();
 	void displayMenuAdmin();
 	void read();
+	void AdminOption1();
+	void AdminOption2();
+	void AdminOption3();
+	bool authenticate(const string &username, const string &password);
+	friend bool operator==(User &user, string &accType)
+	{
+	return (user.getAccountType() == accType);
+	}
+
 };
-
-
 #endif
+

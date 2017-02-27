@@ -1,21 +1,35 @@
 #include "User.h"
+#include <unistd.h>
+#include <cstdlib>
+#include <fstream>
+#include <string.h>
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <iterator>
 #include "Stock.h"
-
+vector <User> UserList;
+vector <User> ManagerList;
 vector <Stock> StockList;
-vector<Stock>::iterator STock;
+
+
+User user;
 
 User::User()
 {
 }
 
 
-User::User(string user, string pass, string accType)
+User::User(string user, string pass, string accType,string accStat)
 {
 	username = user;
 	password = pass;
 	accountType = accType;
+	
 	loginAttempts = 0;
-	isLocked = false;
+	accStatus = accStat;
+
 
 }
 User::~User()
@@ -57,9 +71,9 @@ int User::getloginAttemps()
 	return loginAttempts;
 }
 
-bool User::getAccountStatus()
+string User::getAccountStatus()
 {
-	return isLocked;
+	return accStatus;
 }
 
 
@@ -73,49 +87,62 @@ void User::Login(User aUser)
 	while (1)
 	{
 
-		cout << "\n\n     Welcome to the Warehouse Management Tool!\n";
-		cout << "  ----------------------------------------------";
-		cout << " \n  Please enter your user name: ";
-		cin >> userName;		 
-    		password = getpass("  Please enter your password: "); // get a password
-		cout <<endl<<endl;
 
-   		//printf("%s\n",password); // this is just for conformation
-   	                          // that password stored successfully
+		cout << " Please enter your user name: ";
+		cin >> userName;
+		password = getpass("Enter Password: "); // get a password
 
-		if (aUser.getAccountStatus() == false)
-		{
-			if (userName == aUser.username && password == aUser.password)
+												//printf("%s\n",password); // this is just for conformation
+												// that password stored successfully
+
+
+			if (aUser.authenticate(userName,password) == true)
 			{
-				
-				aUser.loginAttempts = 0;
-				
-				if (aUser.accountType == "Manager")
+				cout << "\n\n Welcome to the Warehouse Management Tool!\n\n";
+	
+				for (int i = 0; i <ManagerList.size(); i++)
 				{
-				displayMenu();
-				}
-				else
-				{
-				displayMenuAdmin();
+					if (ManagerList[i].getUsername() == userName)
+					 {
+						if (ManagerList[i].getAccountStatus() == "N")
+						displayMenu();
+						else
+						if (ManagerList[i].getAccountStatus() == "Y")
+						cout << "Account Locked! Program Terminating" << endl;
+						exit (0);
+					 }
+					
+				
+					else if (UserList[i].getUsername() == userName)
+					{
+						displayMenuAdmin();
+					}
 				}
 			}
 
 			else
-			{
-				cout << "\n Invalid login attempt. Please try again.\n" << '\n';
-				aUser.loginAttempts++;
-				if (aUser.loginAttempts == 3)
+			{	
+				for (int i=0;i < ManagerList.size(); i++)
 				{
-					cout << " Too many login attempts! Your account will now be locked.\n\n";
-					aUser.isLocked = true;
+					if (ManagerList[i].getUsername() == userName)
+					{
+						cout << "\n Invalid login attempt. Please try again.\n" << '\n';
+						ManagerList[i].loginAttempts++;
+					
+						if (ManagerList[i].loginAttempts == 3)
+						{
+							cout << " Too many login attempts! Your account will now be locked.\n\n";
+							ManagerList[i].isLocked == true;
+						}
+					}
+	
 				}
+				
 			}
 
-
-		}
 	}
+	
 
-		
 	cout << " Thank you for logging in.\n";
 
 }
@@ -123,7 +150,6 @@ void User::Login(User aUser)
 
 void User::option1()
 {
-	
 	string itemdes, cat, subcat,month;  
 	int itemid, qty,day,year;   
 	float amount;
@@ -247,13 +273,11 @@ void User::option1()
     myfile << itemid<<":"<<itemdes<<":"<<cat<<":"<<subcat<<":"<<amount<<":"<<qty<<":"<<day<<"-"<<month<<"-"<<year<<endl;
     myfile.close();
 
-   
-
 }
 
 void User::option2()
 {
-	
+
        fstream file;//creating txt file
        file.open("database",ios::in); 
        int temp2 = 0;
@@ -303,37 +327,47 @@ void User::option2()
               temp2++;
        }
 temp2--;
-}																																																					
-
+}
 
 void User::option3()
 {
-
 }
 
 void User::option4()
 {
-string itemdes, cat, subcat,month;  
-	int itemid, qty,day,year,id;   
-	float amount;
-ifstream fileInput;
-  fileInput.open("database");
-  string line, search;
-  cout << "Please enter the term to search: ";
-  cin >> search;
-  for (unsigned int curLine = 0; getline(fileInput, line); curLine++)
-  {
-    if (line.find(search) != string::npos)
-    {
-      cout << "Item description: "<<itemdes<<endl;
-    }
-    else
-    {
-      cout << "Error! Not found on Line" << curLine << endl;
-    }
-  }
+string itemdes, cat, subcat,month;
+    int itemid, qty,day,year,id;
+    float amount;
+string filename = "database";
+
+ifstream dafi(filename.c_str());
+
+if (dafi)
+{
+string search;
+string line;
+
+cout << "Enter the search criteria: ";
+cin >> search;
+cout<< endl;
+
+while (getline(dafi, line))
+{
+if (line.find(search) != std::string::npos)
+{
+cout << line << endl<<endl;;
+}
+}
+}
+else
+{
+cerr << "Cannot open file " << filename << endl;
+return ;
 }
 
+return ;
+
+}
 void User::option5()
 {
 }
@@ -350,8 +384,108 @@ void User::option8()
 {
 }
 
+void User::AdminOption1()
+{
+	string newManagerName;
+	string newManagerPassword;
+	string confirmPassword;
+	string lock = "N";
 
 
+
+	cout << "  Adding New Manager\n";
+	cout << " --------------------\n";
+    
+
+  
+    cout << "Manager Username: ";
+    cin  >> newManagerName;
+    do
+   {
+    cout << "Manager Password: ";
+    cin  >> newManagerPassword;
+    cout << "Please enter password again: ";
+    cin  >> confirmPassword;
+   }
+   while(newManagerPassword != confirmPassword);
+
+
+    cout << "\n\nSuccessfully added a New Manager!\n\n";
+	cout << "Press any key to continue....";
+	cin.ignore();
+	cin.get();
+	system("clear");
+	
+    ofstream myfile("user.txt",  ios::out | ios::app);
+    myfile.seekp( 0, ios_base::end );
+    myfile << "Manager" <<";"<<newManagerName<<";"<<newManagerPassword<<";"<<lock<<endl;
+    User Manager(newManagerName, newManagerPassword, "Manager", lock);
+    ManagerList.push_back(Manager);
+    myfile.close();
+}
+
+void User::AdminOption2()
+{
+	cout <<"Deleting Manager.." << endl;
+	cout <<"------------------" << endl;
+for (int i =0; i < ManagerList.size(); i++)
+{
+cout << i << "\t" << ManagerList[i].getUsername() << endl;
+}
+	cout << "Please enter number to delete: ";
+	int input;
+	cin >> input;
+	if (input > 0)
+	{
+		cout << "Successfully deleted " << ManagerList[input].getUsername() << endl;
+		ManagerList.erase(ManagerList.begin(), ManagerList.begin() + input);
+		
+		ofstream myfile("temp.txt",  ios::out);
+		myfile.seekp( 0, ios_base::end );
+	
+		for(int j=0;j<ManagerList.size();j++)
+		{
+			myfile << "Manager" << ";" << ManagerList[j].getUsername()<< ";" << ManagerList[j].getPassword()<< ";" << "N" << endl;
+		}
+		   
+	}
+	if (input == 0)
+	{
+	cout << "Successfully deleted " << ManagerList[input].getUsername() << endl;
+	ManagerList.erase(ManagerList.begin());
+	
+			ofstream myfile("temp.txt",  ios::out);
+		myfile.seekp( 0, ios_base::end );
+	
+		for(int j=0;j<ManagerList.size();j++)
+		{
+			myfile << "Manager" << ";" << ManagerList[j].getUsername()<< ";" << ManagerList[j].getPassword()<< ";" << "N" << endl;
+		}
+	}
+	
+	
+	
+		
+	
+}
+
+void User::AdminOption3()
+{
+	cout <<"Unlock Manager.." << endl;
+	cout <<"------------------" << endl;
+for (int k =0; k < ManagerList.size(); k++)
+{
+	if (ManagerList[k].getAccountStatus() == "Y")
+	cout << k << "\t" << ManagerList[k].getUsername() << endl;
+}
+	cout << "Please enter number to unlock: ";
+	int input;
+	cin >> input;
+	string unlock = "N";
+	
+
+
+}
 
 void User::displayMenu()
 {
@@ -404,7 +538,7 @@ void User::displayMenu()
 			break;
 		case 9:
 			cout << "Thank you for using Warehouse Management Tool!\n\n";
-			
+
 			exit(-1);
 			break;
 		default:
@@ -417,14 +551,13 @@ void User::displayMenu()
 
 void User::displayMenuAdmin()
 {
-	User user;
 	int loopFlag = 1;
 	int choice;
 	do
 	{
 		//main menu where the program displays all the optionS//
-		cout << "    Warehouse Management Tool(Admin)" << endl;
-		cout << " --------------------------------------" << endl;
+		cout << "    Warehouse Management Tool" << endl;
+		cout << " -------------------------------" << endl;
 		cout << " 1) Add User" << endl;
 		cout << " 2) Remove User" << endl;
 		cout << " 3) Unlock User" << endl;
@@ -436,17 +569,17 @@ void User::displayMenuAdmin()
 		switch (choice)
 		{
 		case 1:
-			user.option1();
+			user.AdminOption1();
 			break;
 		case 2:
-			user.option2();
+			user.AdminOption2();
 			break;
 		case 3:
-			user.option3();
+			user.AdminOption3();
 			break;
 		case 4:
 			cout << "Thank you for using Warehouse Management Tool!\n\n";
-			
+
 			exit(-1);
 			break;
 		default:
@@ -456,9 +589,62 @@ void User::displayMenuAdmin()
 }
 
 
+
+bool User::authenticate(const string &username, const string &password) {
+    ifstream file("user.txt");
+    string facctype,fusername, fpassword;
+    string fislock;
+	
+	
+    while (file) {
+	getline(file, facctype, ';');
+	if (facctype == "Admin")
+	{
+        getline(file, fusername, ';');
+	getline(file, fpassword, ';');
+	getline(file, fislock);
+	User auser(fusername, fpassword, "Admin", fislock);
+	UserList.push_back(auser);
+	} 
+   	else if (facctype == "Manager")
+	{
+	getline(file, fusername, ';');
+	getline(file, fpassword, ';');
+	getline(file, fislock);
+	User Manager(fusername, fpassword, "Manager", fislock);
+	ManagerList.push_back(Manager);
+	}
+
+    }
+	for (int i=0; i<ManagerList.size(); i++)
+	{
+		if (ManagerList[i].getUsername() == username && ManagerList[i].getPassword() == password)
+		{
+
+            		return true;
+		}
+
+	}
+
+	for (int i=0; i<UserList.size(); i++)
+	{
+				if (UserList[i].getUsername() == username && UserList[i].getPassword() == password)
+		{
+
+            		return true;
+		}
+
+	}
+	return false;
+}
+
+void setAccountStatus(string a)
+{
+	
+}
+
 int main()
 {
-	//User.read();
-	User aLoserJoel("joel", "hi", "Manager");
-	aLoserJoel.Login(aLoserJoel);
+
+	user.Login(user);
 }
