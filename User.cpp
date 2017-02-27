@@ -1,11 +1,8 @@
 #include "User.h"
-#include <unistd.h>
-#include <cstdlib>
-#include <fstream>
-#include <string>
-#include <stdio.h>
-#include <iostream>
+#include "Stock.h"
 
+vector <Stock> StockList;
+vector<Stock>::iterator STock;
 
 User::User()
 {
@@ -127,10 +124,11 @@ void User::Login(User aUser)
 void User::option1()
 {
 	
-	//apstring name, dummy;
-	string itemdes, cat, subcat;  
-	int itemid, qty;   
+	string itemdes, cat, subcat,month;  
+	int itemid, qty,day,year;   
 	float amount;
+
+	
 
 
 
@@ -198,6 +196,45 @@ void User::option1()
 
 	} while(qty < 0);
 
+     
+     do
+	{
+	cout << "Date (dd): ";
+
+	while(!(cin>>day) || (day < 0))
+	{
+		cin.clear();
+ 		cin.ignore(100,'\n');
+		cout << "\nInvalid. Please try again!\n\n";
+		cout << "Date (dd): ";
+	}
+			
+
+	} while(day < 0);
+
+  
+	cout << "Date (mmm): ";
+	cin>>month;
+	month[0] = toupper(month[0]);
+
+
+     do
+	{
+	cout << "Date (yy): ";
+
+	while(!(cin>>year) || (year < 0))
+	{
+		cin.clear();
+ 		cin.ignore(100,'\n');
+		cout << "\nInvalid. Please try again!\n\n";
+		cout << "Date (yy): ";
+	}
+			
+
+	} while(year < 0);
+
+
+
 
     cout << "\n\nSuccessfully added a New Stock!\n\n";
 	cout << "Press any key to continue....";
@@ -207,7 +244,7 @@ void User::option1()
 	
     ofstream myfile("database",  ios::out | ios::app);
     myfile.seekp( 0, ios_base::end );
-    myfile << itemid<<":"<<itemdes<<":"<<cat<<":"<<subcat<<":"<<amount<<":"<<qty<<endl;
+    myfile << itemid<<":"<<itemdes<<":"<<cat<<":"<<subcat<<":"<<amount<<":"<<qty<<":"<<day<<"-"<<month<<"-"<<year<<endl;
     myfile.close();
 
    
@@ -216,14 +253,85 @@ void User::option1()
 
 void User::option2()
 {
-}
+	
+       fstream file;//creating txt file
+       file.open("database",ios::in); 
+       int temp2 = 0;
+       cout << "Data In Reading File" << endl;
+       while (file) {
+              string temp;
+              getline(file, temp);
+              ++temp2;
+       }
+
+       cout << endl;
+       string *data = new string[temp2];
+       temp2 = 0;
+       file.close();
+       file.open("database", ios::in);
+       while (file) {
+              string temp;
+              getline(file, temp);
+              cout <<temp2+1<<"  "<< temp << endl;
+              data[temp2] = temp;
+              temp2++;
+       }
+	temp2--;
+       file.close();
+
+       //writing data on file
+	string data2;
+	cout << "\nEnter Data that you want to delete: ";
+	cin >> data2;  
+	cout<<endl;     
+	getline(file, data2,':');
+       file.open("database", ios::out);
+       for (int i = 0; i < temp2; i++) {
+              if (data[i] != data2) {
+                     file << data[i] << endl;
+              }
+       }
+       file.close();
+
+       //printing just data
+       file.open("database", ios::in);
+       temp2 = 0;
+       while (file) {
+              string temp;
+              getline(file, temp);
+              cout << temp2 + 1 << "  " << temp << endl;
+              temp2++;
+       }
+temp2--;
+}																																																					
+
 
 void User::option3()
 {
+
 }
 
 void User::option4()
 {
+string itemdes, cat, subcat,month;  
+	int itemid, qty,day,year,id;   
+	float amount;
+ifstream fileInput;
+  fileInput.open("database");
+  string line, search;
+  cout << "Please enter the term to search: ";
+  cin >> search;
+  for (unsigned int curLine = 0; getline(fileInput, line); curLine++)
+  {
+    if (line.find(search) != string::npos)
+    {
+      cout << "Item description: "<<itemdes<<endl;
+    }
+    else
+    {
+      cout << "Error! Not found on Line" << curLine << endl;
+    }
+  }
 }
 
 void User::option5()
@@ -348,20 +456,6 @@ void User::displayMenuAdmin()
 }
 
 
-
-
-/*void User::read() 
-{
-    std::ifstream file("authdata.txt");
-    std::string fusername, fpassword, facctype;
- while (file) {
-        std::getline(file, fusername, ';'); 
-        std::getline(file, fpassword, ';'); 
-	 std::getline(file, facctype);  
-    }
-
-}
-*/
 int main()
 {
 	//User.read();

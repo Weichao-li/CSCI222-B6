@@ -1,4 +1,5 @@
-#pragma once
+#ifndef USER_H_
+#define USER_H_
 #include <unistd.h>
 #include <cstdlib>
 #include <fstream>
@@ -8,11 +9,15 @@
 #include <limits>
 #include <cmath>
 #include <iomanip>
+#include <vector>
+#include <algorithm>
+#include <sstream>
+#include "Stock.h"
 
 
 using namespace std;
 
-class User
+class User: public Stock
 {
 private:
 	string username;
@@ -48,3 +53,6 @@ public:
 	void displayMenuAdmin();
 	void read();
 };
+
+
+#endif
