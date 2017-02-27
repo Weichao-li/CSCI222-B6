@@ -1,8 +1,14 @@
 #pragma once
+#include <unistd.h>
+#include <cstdlib>
+#include <fstream>
 #include <string>
 #include <stdio.h>
 #include <iostream>
-#include <conio.h>
+#include <limits>
+#include <cmath>
+#include <iomanip>
+
 
 using namespace std;
 
@@ -39,5 +45,6 @@ public:
 	void option7();
 	void option8();
 	void displayMenu();
+	void displayMenuAdmin();
+	void read();
 };
-
